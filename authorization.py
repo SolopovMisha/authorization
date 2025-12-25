@@ -1,21 +1,32 @@
 from cryptography.fernet import Fernet
 from main import load_key
 
-key = load_key()
-fernet_key = Fernet(key)
+def authorize(fernet_obj):
+    while True:
+        login = input("Введите логин: ")
+        password = input("Введите пароль: ")
+        
+        try:
+            with open("passwords.txt", "r") as file:
+                for line in file:
+                    line = line.strip()
+                    if line:
+                        stored_login, encrypted_password = line.split("|")
+                        if stored_login == login:
+                            decrypted_password = fernet_obj.decrypt(encrypted_password.encode()).decode()
+                            if decrypted_password == password:
+                                print("Вы авторизованы")
+                                return True
+        except FileNotFoundError:
+            print("Файл с паролями не найден")
+            return False
+        
+        print("Такого пользователя нет или пароль неверен")
 
+def main():
+    key = load_key()
+    fernet_key = Fernet(key)
+    authorize(fernet_key)
 
-def authorization(login, password, fernet_obj):
-    with open("passwords.txt") as file:
-        for line in file:
-            if line.strip():
-                stored_login, encrypted_password = line.strip().split("|")
-                if stored_login == login:
-                    return fernet_obj.decrypt(encrypted_password.encode()).decode() == password
-    return False
-
-while True:
-    if authorization(input("Введите логин: "), input("Введите пароль: "), fernet_key):
-        print("Вы авторизованы")
-        break
-    print("Такого пользователя нет")
+if __name__ == "__main__":
+    main()
