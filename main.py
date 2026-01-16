@@ -1,15 +1,18 @@
 import os
 from cryptography.fernet import Fernet
 
+
 def write_key():
     if not os.path.exists("key.key"):
         key = Fernet.generate_key()
         with open("key.key", "wb") as key_file:
             key_file.write(key)
 
+
 def load_key():
     with open("key.key", "rb") as key_file:
         return key_file.read()
+
 
 def add_password(fernet_obj):
     login = input("Введите логин: ")
@@ -19,6 +22,7 @@ def add_password(fernet_obj):
 
     with open("passwords.txt", "a") as file:
         file.write(f"{login}|{encrypted_password.decode()}\n")
+
 
 def view(fernet_obj):
     if not os.path.exists("passwords.txt"):
@@ -33,7 +37,8 @@ def view(fernet_obj):
                 decrypted = fernet_obj.decrypt(enc.encode()).decode()
                 print(f"Логин: {login} | Пароль: {decrypted}")
 
-def main_menu():
+
+def main():
     write_key()
     key = load_key()
     fernet_key = Fernet(key)
@@ -56,4 +61,4 @@ def main_menu():
             print("Неверный выбор. Попробуйте снова.")
 
 if __name__ == "__main__":
-    main_menu()
+    main()
